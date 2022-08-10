@@ -33,6 +33,26 @@
 <script type="text/javascript" src="/static/js/script.js" defer></script>
 <!--[if lt IE 9]><script src="/static/js/libs/respond-1.4.2.min.js"></script><![endif]-->
 <!-- /scripts -->
+
+<!-- CUSTOM STYLES -->
+<style>
+  .error{
+    color: #ff0000;
+  }
+  .del-form{
+    display: inline-block;
+    margin-left: 1.5rem;
+  }
+  .del-btn{
+    background-color: #f7630c;
+    border: 1px solid #f7630c;
+    color: #fff;
+    padding: 9px 14px 10px 14px;
+    line-height: 1.3333333;
+    border-radius:6px;
+    font-size: 18px;
+  }
+</style>
 </head>
 <body>
 
@@ -89,10 +109,10 @@
     <!-- Begin page content -->
     <main id="content" role="main" class="container">
 
-      {% with messages = get_flashed_messages() %}
+      {% with messages = get_flashed_messages(with_categories=True) %}
         {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-block alert-info fade in">
+          {% for category, message in messages %}
+            <div class="alert alert-block alert-info fade in {{category}}">
               <a class="close" data-dismiss="alert">&times;</a>
               {{ message }}
             </div>

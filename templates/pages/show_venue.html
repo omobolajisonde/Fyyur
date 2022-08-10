@@ -74,8 +74,10 @@
 		{% endfor %}
 	</div>
 </section>
-
 <a href="/venues/{{ venue.id }}/edit"><button class="btn btn-primary btn-lg">Edit</button></a>
+<form action="/venues/{{ venue.id }}" method="post" class="del-form">
+	<input type="submit" value="Delete" class="del-btn">
+</form>
 
 {% endblock %}
 
