@@ -21,6 +21,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+
 from flask_migrate import Migrate
 
 # ----------------------------------------------------------------------------#
@@ -33,70 +34,10 @@ app.config.from_object("config")
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-
 # ----------------------------------------------------------------------------#
 # Models.
 # ----------------------------------------------------------------------------#
-
-
-class Venue(db.Model):
-    __tablename__ = "venues"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(120), nullable=False)
-    address = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
-    facebook_link = db.Column(db.String(120))
-    genres = db.Column(db.String(120), nullable=False)
-    website_link = db.Column(db.String(500))
-    searching_talent = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String())
-    shows = db.relationship(
-        "Show", backref="venues", lazy=False, cascade="all, delete-orphan"
-    )
-
-
-class Artist(db.Model):
-    __tablename__ = "artists"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(120), nullable=False)
-    genres = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(500))
-    searching_venue = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String())
-    shows = db.relationship(
-        "Show", backref="artists", lazy=False, cascade="all, delete-orphan"
-    )
-
-
-class Show(db.Model):
-    __tablename__ = "shows"
-
-    artist_id = db.Column(db.Integer, db.ForeignKey(
-        "artists.id"), primary_key=True)
-    venue_id = db.Column(db.Integer, db.ForeignKey(
-        "venues.id"), primary_key=True)
-    start_time = db.Column(db.DateTime, nullable=False)
-
-    def __repr__(self):
-        return f"<Artist ID: {self.artist_id}>, <Venue ID: {self.venue_id}>, <Start Time: {self.start_time}> \n"
-
-
-# show = db.Table(
-#     "shows",
-#     db.Column("artist_id", db.Integer, db.ForeignKey("artists.id"), primary_key=True),
-#     db.Column("venue_id", db.Integer, db.ForeignKey("venues.id"), primary_key=True),
-#     db.Column("start_time", db.DataTime, nullable=False),
-# )
+from models import *
 
 # ----------------------------------------------------------------------------#
 # Filters.
@@ -118,14 +59,12 @@ app.jinja_env.filters["datetime"] = format_datetime
 # Helper Functions.
 # ----------------------------------------------------------------------------#
 
+# This function helps construct error msgs using data from form.errors
 
 def error_msg_constructor(error_dict):
     error_msg = ""
     keys = list(error_dict.keys())
     values = list(error_dict.values())
-    cj1 = "."
-    cj2 = "and"
-    cj3 = ","
     for i in range(len(error_dict)):
         if (i+1) == len(error_dict):
             error_msg = error_msg + values[i][0] + " for " + keys[i] + "."
@@ -174,7 +113,7 @@ def venues():
                         filter(
                             lambda showRow: showRow.start_time > datetime.now(),
                             venue.shows,
-                        )
+                        ) # filters out past shows form venue.shows
                     )
                 ),
             }
@@ -192,7 +131,7 @@ def search_venues():
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     search_query = request.form.get("search_term", "")
     search_results = Venue.query.filter(
-        Venue.name.ilike("%{}%".format(search_query))).all()
+        Venue.name.ilike("%{}%".format(search_query))).all() # Queries row(s) from venues table with name fully or partially matching search_query
     response = {
         "count": len(search_results)
     }
@@ -201,7 +140,7 @@ def search_venues():
         result_data = {
             "id": result.id,
             "name": result.name,
-            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))),
+            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))), # filters out past shows form venue.shows
         }
         data.append(result_data)
     response["data"] = data
@@ -234,7 +173,7 @@ def show_venue(venue_id):
 
     # GETTING PAST SHOWS FOR THE CURRENT VENUE
     past_shows_results = filter(
-        lambda show: show.start_time < datetime.now(), venue.shows
+        lambda show: show.start_time < datetime.now(), venue.shows 
     )
     past_shows = []
     for past_show in past_shows_results:
@@ -323,7 +262,7 @@ def create_venue_submission():
             abort(500)
         else:
             # on successful db insert, flash success
-            flash(f"Venue, {request.form['name']} was successfully listed!")
+            flash(f"Venue, \"{request.form['name']}\" was successfully listed!")
             return redirect(url_for("venues"))
             # return render_template('pages/home.html')
     else:
@@ -335,7 +274,6 @@ def create_venue_submission():
 
 @app.route("/venues/<venue_id>", methods=["POST"])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
     error = None
     try:
         venue = Venue.query.get(venue_id)
@@ -347,10 +285,11 @@ def delete_venue(venue_id):
     finally:
         db.session.close()
     if error:
-        flash(f"An error occured. Venue, {venue.name} could not be deleted",'error')
+        flash(
+            f"An error occured. Venue, \"{venue.name}\" could not be deleted", 'error')
         abort(500)
-    else: 
-        flash(f"Venue, '{venue.name}' was successfully deleted.")
+    else:
+        flash(f"Venue, \"{venue.name}\" was successfully deleted.")
         return redirect(url_for("index"))
 
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
@@ -358,6 +297,8 @@ def delete_venue(venue_id):
 
 #  Artists
 #  ----------------------------------------------------------------
+
+
 @app.route("/artists")
 def artists():
     artists = Artist.query.all()
@@ -378,7 +319,7 @@ def search_artists():
     # search for "band" should return "The Wild Sax Band".
     search_query = request.form.get("search_term", "")
     search_results = Artist.query.filter(
-        Artist.name.ilike("%{}%".format(search_query))).all()
+        Artist.name.ilike("%{}%".format(search_query))).all() # Queries row(s) from Artist table with name fully or partially matching search_query
     response = {
         "count": len(search_results)
     }
@@ -387,7 +328,7 @@ def search_artists():
         result_data = {
             "id": result.id,
             "name": result.name,
-            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))),
+            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))), # filters out past shows
         }
         data.append(result_data)
     response["data"] = data
@@ -508,7 +449,7 @@ def edit_artist_submission(artist_id):
             db.session.close()
         if error:
             flash(
-                f"An error occurred. {form.name.data}, we could not update your info. Please try again!", "error")
+                f"An error occurred. Artist, \"{form.name.data}\", info could not be updated. Please try again!", "error")
             abort(500)
         else:
             # on successful db insert, flash success
@@ -526,7 +467,7 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
     form = VenueForm()
     venue = Venue.query.get(venue_id)
-    form.genres.data = venue.genres.split(", ")
+    form.genres.data = venue.genres.split(", ") # split each genre back to a list
     form.state.data = venue.state
     data = {
         "id": venue.id,
@@ -694,7 +635,7 @@ def create_show_submission():
         artist_id = form.artist_id.data
         venue_id = form.venue_id.data
         # start_time = form.start_time.data
-        start_time = request.form.get("start_time","")
+        start_time = request.form.get("start_time", "")
         show = Show(artist_id=artist_id, venue_id=venue_id,
                     start_time=start_time)
         db.session.add(show)
