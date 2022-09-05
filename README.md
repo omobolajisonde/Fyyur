@@ -5,6 +5,8 @@ Fyyur
 
 Fyyur is a musical venue and artist booking site that facilitates the discovery and bookings of shows between local performing artists and venues. This site lets you list new artists and venues, discover them, and list shows with artists as a venue owner.
 
+![project demo](./demo-gif.gif)
+
 Built as a project in the [Udacity's Full Stack web developer Nanodegree](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd0044)
 
 All backend code follows PEP8 style guidelines.
@@ -132,4 +134,4 @@ Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5000/) or
 [Udacity FSND Team](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd0044) and [Sonde Omobolaji](https://github.com/omobolajisonde)
 
 ## Acknowledgements
-The awesome team at Udacity and my dear [Amy Hua](https://github.com/amyhua)
+The awesome team at Udacity and my dear instructor, [Amy Hua](https://github.com/amyhua)
