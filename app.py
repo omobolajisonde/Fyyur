@@ -2,6 +2,7 @@
 # Imports
 # ----------------------------------------------------------------------------#
 
+from models import *
 import json
 import dateutil.parser
 import babel
@@ -37,7 +38,6 @@ migrate = Migrate(app, db)
 # ----------------------------------------------------------------------------#
 # Models.
 # ----------------------------------------------------------------------------#
-from models import *
 
 # ----------------------------------------------------------------------------#
 # Filters.
@@ -60,6 +60,7 @@ app.jinja_env.filters["datetime"] = format_datetime
 # ----------------------------------------------------------------------------#
 
 # This function helps construct error msgs using data from form.errors
+
 
 def error_msg_constructor(error_dict):
     error_msg = ""
@@ -113,7 +114,7 @@ def venues():
                         filter(
                             lambda showRow: showRow.start_time > datetime.now(),
                             venue.shows,
-                        ) # filters out past shows form venue.shows
+                        )  # filters out past shows form venue.shows
                     )
                 ),
             }
@@ -131,7 +132,7 @@ def search_venues():
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     search_query = request.form.get("search_term", "")
     search_results = Venue.query.filter(
-        Venue.name.ilike("%{}%".format(search_query))).all() # Queries row(s) from venues table with name fully or partially matching search_query
+        Venue.name.ilike("%{}%".format(search_query))).all()  # Queries row(s) from venues table with name fully or partially matching search_query
     response = {
         "count": len(search_results)
     }
@@ -140,7 +141,8 @@ def search_venues():
         result_data = {
             "id": result.id,
             "name": result.name,
-            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))), # filters out past shows form venue.shows
+            # filters out past shows form venue.shows
+            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))),
         }
         data.append(result_data)
     response["data"] = data
@@ -175,7 +177,7 @@ def show_venue(venue_id):
 
     # GETTING PAST SHOWS FOR THE CURRENT VENUE
     past_shows_results = filter(
-        lambda show: show.start_time < datetime.now(), venue.shows 
+        lambda show: show.start_time < datetime.now(), venue.shows
     )
     past_shows = []
     for past_show in past_shows_results:
@@ -264,7 +266,8 @@ def create_venue_submission():
             abort(500)
         else:
             # on successful db insert, flash success
-            flash(f"Venue, \"{request.form['name']}\" was successfully listed!")
+            flash(
+                f"Venue, \"{request.form['name']}\" was successfully listed!")
             return redirect(url_for("venues"))
             # return render_template('pages/home.html')
     else:
@@ -274,31 +277,29 @@ def create_venue_submission():
         return render_template("forms/new_venue.html", form=form)
 
 
-@app.route("/venues/<venue_id>", methods=["POST"])
+@app.route("/venues/<int:venue_id>", methods=["POST"])
 def delete_venue(venue_id):
     error = None
-    body = {}
-    try:
-        confirm_delete = request.get_json().get("confirmDelete", None)
-        if confirm_delete:
+    confirm_delete = request.get_json().get("confirmDelete", None)
+    if confirm_delete:
+        try:
             venue = Venue.query.get(venue_id)
-            body["venue_name"] = venue.name
             db.session.delete(venue)
             db.session.commit()
+        except:
+            error = True
+            db.session.rollback()
+        finally:
+            db.session.close()
+        if error:
+            print("HEREE")
+            flash(f"An error occured. Venue, \"{venue.name}\" could not be deleted", 'error')
+            abort(500)
         else:
-            return ""
-    except:
-        error = True
-        db.session.rollback()
-    finally:
-        db.session.close()
-    if error:
-        flash(
-            f"An error occured. Venue, \"{body['venue_name']}\" could not be deleted", 'error')
-        abort(500)
+            print("HERE")
+            flash(f"Venue, \"{venue.name}\" was successfully deleted.")
+            return redirect(url_for("index"))
     else:
-        print("HERE")
-        flash(f"Venue, \"{body['venue_name']}\" was successfully deleted.")
         return redirect(url_for("index"))
 
 
@@ -326,7 +327,7 @@ def search_artists():
     # search for "band" should return "The Wild Sax Band".
     search_query = request.form.get("search_term", "")
     search_results = Artist.query.filter(
-        Artist.name.ilike("%{}%".format(search_query))).all() # Queries row(s) from Artist table with name fully or partially matching search_query
+        Artist.name.ilike("%{}%".format(search_query))).all()  # Queries row(s) from Artist table with name fully or partially matching search_query
     response = {
         "count": len(search_results)
     }
@@ -335,7 +336,8 @@ def search_artists():
         result_data = {
             "id": result.id,
             "name": result.name,
-            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))), # filters out past shows
+            # filters out past shows
+            "num_upcoming_shows": len(list(filter(lambda show: show.start_time > datetime.now(), result.shows))),
         }
         data.append(result_data)
     response["data"] = data
@@ -475,7 +477,8 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
     form = VenueForm()
     venue = Venue.query.get(venue_id)
-    form.genres.data = venue.genres.split(", ") # split each genre back to a list
+    form.genres.data = venue.genres.split(
+        ", ")  # split each genre back to a list
     form.state.data = venue.state
     data = {
         "id": venue.id,
