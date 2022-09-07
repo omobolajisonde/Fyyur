@@ -155,6 +155,8 @@ def search_venues():
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
     venue = Venue.query.get(venue_id)
+    if venue == None:
+        abort(404)
 
     data = {
         "id": venue.id,
@@ -275,10 +277,16 @@ def create_venue_submission():
 @app.route("/venues/<venue_id>", methods=["POST"])
 def delete_venue(venue_id):
     error = None
+    body = {}
     try:
-        venue = Venue.query.get(venue_id)
-        db.session.delete(venue)
-        db.session.commit()
+        confirm_delete = request.get_json().get("confirmDelete", None)
+        if confirm_delete:
+            venue = Venue.query.get(venue_id)
+            body["venue_name"] = venue.name
+            db.session.delete(venue)
+            db.session.commit()
+        else:
+            return ""
     except:
         error = True
         db.session.rollback()
@@ -286,14 +294,13 @@ def delete_venue(venue_id):
         db.session.close()
     if error:
         flash(
-            f"An error occured. Venue, \"{venue.name}\" could not be deleted", 'error')
+            f"An error occured. Venue, \"{body['venue_name']}\" could not be deleted", 'error')
         abort(500)
     else:
-        flash(f"Venue, \"{venue.name}\" was successfully deleted.")
+        print("HERE")
+        flash(f"Venue, \"{body['venue_name']}\" was successfully deleted.")
         return redirect(url_for("index"))
 
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -344,7 +351,8 @@ def search_artists():
 def show_artist(artist_id):
     # shows the artist page with the given artist_id
     artist = Artist.query.get(artist_id)
-
+    if artist == None:
+        abort(404)
     data = {
         "id": artist.id,
         "name": artist.name,
