@@ -2,7 +2,6 @@
 # Imports
 # ----------------------------------------------------------------------------#
 
-from models import *
 import json
 import dateutil.parser
 import babel
@@ -15,14 +14,14 @@ from flask import (
     redirect,
     url_for,
     abort,
+    jsonify
 )
 from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
-
+from models import setup_db, Artist, Venue, Show
 from flask_migrate import Migrate
 
 # ----------------------------------------------------------------------------#
@@ -31,14 +30,14 @@ from flask_migrate import Migrate
 
 app = Flask(__name__)
 moment = Moment(app)
-app.config.from_object("config")
-db = SQLAlchemy(app)
+app.config.from_object("config") #configuring our Flask App from a config file
+# print(app.config)
+db = setup_db(app) # initializes our Flask app with db
 migrate = Migrate(app, db)
 
 # ----------------------------------------------------------------------------#
 # Models.
 # ----------------------------------------------------------------------------#
-
 # ----------------------------------------------------------------------------#
 # Filters.
 # ----------------------------------------------------------------------------#
@@ -94,6 +93,7 @@ def index():
 
 @app.route("/venues")
 def venues():
+    print("HEREEEEEEEEEEEEEEEEEEEEEE")
     # num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
     data = []
     distinct_venues = (
@@ -284,6 +284,7 @@ def delete_venue(venue_id):
     if confirm_delete:
         try:
             venue = Venue.query.get(venue_id)
+            print(venue) 
             db.session.delete(venue)
             db.session.commit()
         except:
@@ -292,15 +293,14 @@ def delete_venue(venue_id):
         finally:
             db.session.close()
         if error:
-            print("HEREE")
-            flash(f"An error occured. Venue, \"{venue.name}\" could not be deleted", 'error')
+            flash(
+                f"An error occured. Venue, \"{venue.name}\" could not be deleted", 'error')
             abort(500)
         else:
-            print("HERE")
             flash(f"Venue, \"{venue.name}\" was successfully deleted.")
-            return redirect(url_for("index"))
+            return jsonify({"redirect":True})
     else:
-        return redirect(url_for("index"))
+        return jsonify({"redirect":False})
 
 
 #  Artists

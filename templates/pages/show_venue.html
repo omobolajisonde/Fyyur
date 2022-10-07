@@ -93,12 +93,8 @@ block content %}
 <a href="/venues/{{ venue.id }}/edit"
   ><button class="btn btn-primary btn-lg">Edit</button></a
 >
-<form id="del-form">
-  <input
-    type="submit"
-    value="Delete"
-    class="del-btn"
-  />
+<form id="del-form" method="post" action="/venues/{{ venue.id }}">
+  <input type="submit" value="Delete" class="del-btn" />
 </form>
 
 <script>
@@ -107,18 +103,23 @@ block content %}
     event.preventDefault();
     const confirmDelete = confirm("Delete '{{ venue.name }}' venue?");
     try {
-      await fetch("/venues/{{ venue.id }}", {
+      const response = await fetch("/venues/{{ venue.id }}", {
         method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           confirmDelete,
         }),
       });
+      const body = await response.json();
+      console.log(body)
+      const {redirect} = body
+      if (redirect)
+      window.location.replace("/venues");
     } catch (error) {
-		console.log(error);
-	}
+      console.log(error);
+    }
   });
 </script>
 

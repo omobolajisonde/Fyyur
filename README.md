@@ -19,7 +19,8 @@ Tech stack for the backend includes the following:
  * **SQLAlchemy ORM** to be our ORM library of choice
  * **PostgreSQL** as our database of choice
  * **Python3** and **Flask** as our server language and server framework
- * **Flask-Migrate** for creating and running schema migrations
+ * **Flask-Migrate** for creating and running schema migrations.
+  
 You can download and install the dependencies mentioned above using `pip` as:
 ```
 pip install virtualenv
@@ -47,8 +48,9 @@ npm install bootstrap@3
 
   ```sh
   ├── README.md
-  ├── app.py *** the main driver of the app. Includes your SQLAlchemy models.
-                    "python app.py" to run after installing dependencies
+  ├── app.py *** the main driver of the app.
+                    "python app.py" to run after installing dependencies 
+  ├── models.py *** Includes your SQLAlchemy models.
   ├── config.py *** Database URLs, CSRF generation, etc
   ├── error.log
   ├── forms.py *** Your forms
@@ -67,7 +69,7 @@ npm install bootstrap@3
   ```
 
 Overall:
-* Models are located in the `MODELS` section of `app.py`.
+* Models are located in the `models.py` file`.
 * Controllers are also located in `app.py`.
 * The web frontend is located in `templates/`, which builds static assets deployed to the web server at `static/`.
 * Web forms for creating data are located in `form.py`
@@ -120,8 +122,8 @@ pip install -r requirements.txt
 
 5. **Run the development server:**
 ```
-export FLASK_APP=myapp
-export FLASK_ENV=development # enables debug mode
+export FLASK_APP=app.py
+export FLASK_DEBUG=true # enables debug mode
 python3 app.py
 ```
 
