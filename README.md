@@ -5,7 +5,7 @@ Fyyur
 
 Fyyur is a musical venue and artist booking site that facilitates the discovery and bookings of shows between local performing artists and venues. This site lets you list new artists and venues, discover them, and list shows with artists as a venue owner.
 
-![project demo](./demo-gif.gif)
+![project demo](./Fyyur.png)
 
 Built as a project in the [Udacity's Full Stack web developer Nanodegree](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd0044)
 
@@ -80,32 +80,19 @@ Highlight folders:
 * `templates/layouts` -- Defines the layout that a page can be contained in to define footer and header code for a given page.
 * `templates/forms` -- Defines the forms used to create new artists, shows, and venues.
 * `app.py` -- Defines routes that match the user’s URL, and controllers which handle data and renders views to the user.
-* Models in `app.py` -- Defines the data models that set up the database tables.
+* Models in `models.py` -- Defines the data models that set up the database tables.
 * `config.py` -- Stores configuration variables and instructions, separate from the main application code. This is where you will need to connect to the database.
 
 
 ## Getting started locally
-1. **Download the project starter code locally**
-```
-git clone https://github.com/omobolajisonde/Fyyur.git
+### **Download the project starter code**
+Fork this repo and clone to you local
+```sh
+git clone https://github.com/your_username/Fyyur.git
 cd Fyyur
 ```
 
-2. **Create an empty repository in your Github account online. To change the remote repository path in your local repository, use the commands below:**
-```
-git remote -v 
-git remote remove origin 
-git remote add origin <https://github.com/<USERNAME>/<REPO_NAME>.git>
-git branch -M master
-```
-Once you have finished editing your code, you can push the local repository to your Github account using the following commands.
-```
-git add . --all   
-git commit -m "your comment"
-git push -u origin master
-```
-
-3. **Initialize and activate a virtualenv using:**
+### **Initialize and activate a virtualenv using:**
 ```
 python -m virtualenv env
 source env/bin/activate
@@ -115,20 +102,27 @@ source env/bin/activate
 source env/Scripts/activate
 ```
 
-4. **Install the dependencies:**
-```
+### **Install the dependencies:**
+```sh
 pip install -r requirements.txt
 ```
 
-5. **Run the development server:**
+### **To sync the current database, just refresh the migrations folder and run the upgrade command below.**
+```sh
+flask db upgrade
+```
+
+### **Run the development server:**
 ```
 export FLASK_APP=app.py
 export FLASK_DEBUG=true # enables debug mode
 python3 app.py
 ```
 
-6. **Verify on the Browser**<br>
+### **Verify on the Browser**<br>
 Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5000/) or [http://localhost:5000](http://localhost:5000) 
+
+![homepage](/home.png)
 
 ## Deployment N/A
 
